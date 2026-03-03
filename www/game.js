@@ -1,4 +1,21 @@
-const firebaseConfig = {
+const firebaseConfig = {// Ekran kapanmasını engelle
+let wakeLock = null;
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+                requestWakeLock();
+            });
+        }
+    } catch (e) {}
+}
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        requestWakeLock();
+    }
+});
     apiKey: "AIzaSyB3DgeOTZMHClqzRsKuhnxBVDNaVUq9RHk",
     authDomain: "gold-clicker-bf955.firebaseapp.com",
     databaseURL: "https://gold-clicker-bf955-default-rtdb.firebaseio.com",
