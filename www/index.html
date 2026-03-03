@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gold Clicker V3</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* ÜST BANNER */
+        #banner-top {
+            width: 100%;
+            height: 50px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #aaa;
+            border-bottom: 1px solid #333;
+        }
+
+        /* ALT BANNER */
+        #banner-bottom {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #aaa;
+            border-top: 1px solid #333;
+            z-index: 100;
+        }
+
+        #game-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 15px 15px 70px 15px;
+        }
+
+        /* ALTIN SAYACI */
+        #gold-display {
+            text-align: center;
+            padding: 20px 0 10px;
+        }
+        #gold-display .gold-icon { font-size: 3rem; }
+        #gold-display .gold-amount {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+        #gold-display .gold-per-sec {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        /* TIKLAMA BUTONU */
+        #click-btn {
+            display: block;
+            width: 160px;
+            height: 160px;
+            margin: 15px auto;
+            border-radius: 50%;
+            border: none;
+            background: radial-gradient(circle at 35% 35%, #ffd700, #ff8c00, #8B6914);
+            box-shadow: 0 0 30px rgba(255,215,0,0.4), 0 8px 20px rgba(0,0,0,0.5);
+            cursor: pointer;
+            font-size: 3.5rem;
+            transition: transform 0.1s, box-shadow 0.1s;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #click-btn:active {
+            transform: scale(0.93);
+            box-shadow: 0 0 15px rgba(255,215,0,0.3), 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .click-info {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        /* BÖLÜM BAŞLIKLARI */
+        .section-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 15px 0 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255,215,0,0.3);
+        }
+
+        /* YÜKSELTMELER */
+        .upgrade-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upgrade-card:hover { background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3); }
+        .upgrade-card.disabled { opacity: 0.4; cursor: not-allowed; }
+        .upgrade-card.disabled:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .upgrade-icon { font-size: 2rem; width: 45px; text-align: center; }
+        .upgrade-info { flex: 1; }
+        .upgrade-name { font-weight: bold; font-size: 0.95rem; }
+        .upgrade-desc { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
+        .upgrade-level { font-size: 0.75rem; color: #ffd700; margin-top: 2px; }
+        .upgrade-cost {
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #ffd700;
+            white-space: nowrap;
+        }
+
+        /* BOT KARTLARI */
+        .bot-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,100,0,0.2);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .bot-card:hover { background: rgba(255,100,0,0.1); border-color: rgba(255,100,0,0.4); }
+        .bot-card.disabled { opacity: 0.4; cursor: not-allowed; }
+        .bot-card.disabled:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,100,0,0.2); }
+
+        /* 2X HIZLANMA */
+        #boost-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #boost-btn:active { opacity: 0.8; }
+        #boost-timer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 5px;
+            min-height: 20px;
+        }
+
+        /* LİDERLİK TABLOSU */
+        #leaderboard {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 5px;
+        }
+        .lb-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+        }
+        .lb-row:last-child { border-bottom: none; }
+        .lb-rank { color: #ffd700; width: 30px; }
+        .lb-name { flex: 1; }
+        .lb-score { color: #ffd700; }
+
+        /* FLOATING TEXT */
+        .float-text {
+            position: fixed;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffd700;
+            pointer-events: none;
+            z-index: 999;
+            animation: floatUp 1s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-80px); }
+        }
+
+        /* BOOST AKTİF */
+        #boost-active {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea33, #764ba233);
+            border: 1px solid #667eea;
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- ÜST BANNER -->
+    <div id="banner-top">📢 Reklam Alanı - Banner Üst</div>
+
+    <div id="game-container">
+        <!-- ALTIN SAYACI -->
+        <div id="gold-display">
+            <div class="gold-icon">🏆</div>
+            <div class="gold-amount" id="gold-amount">0</div>
+            <div class="gold-per-sec" id="gold-per-sec">+0 altın/sn</div>
+        </div>
+
+        <!-- TIKLAMA -->
+        <button id="click-btn">💰</button>
+        <div class="click-info" id="click-info">Tıklama başına: 1 altın</div>
+
+        <!-- 2X BOOST -->
+        <button id="boost-btn">🎬 Reklam İzle → 2x Hız (5 Dakika)</button>
+        <div id="boost-timer"></div>
+        <div id="boost-active">⚡ 2x Hız Aktif! <span id="boost-countdown"></span></div>
+
+        <!-- YÜKSELTMELER -->
+        <div class="section-title">⚔️ Tıklama Yükseltmeleri</div>
+        <div id="click-upgrades"></div>
+
+        <!-- BOTLAR -->
+        <div class="section-title">🤖 Otomatik Madenci Botlar</div>
+        <div id="bot-upgrades"></div>
+
+        <!-- LİDERLİK -->
+        <div class="section-title">🏅 Liderlik Tablosu</div>
+        <div id="leaderboard">
+            <div class="lb-row"><span class="lb-rank">🥇</span><span class="lb-name">Yükleniyor...</span><span class="lb-score">-</span></div>
+        </div>
+    </div>
+
+    <!-- ALT BANNER -->
+    <div id="banner-bottom">📢 Reklam Alanı - Banner Alt</div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
