@@ -1,25 +1,3 @@
-// Ekran kapanmasını engelle
-document.addEventListener('deviceready', async () => {
-    try {
-        const { KeepAwake } = await import('@capacitor-community/keep-awake');
-        await KeepAwake.keepAwake();
-    } catch(e) {}
-});
-
-let wakeLock = null;
-async function requestWakeLock() {
-    try {
-        if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-            wakeLock.addEventListener('release', () => requestWakeLock());
-        }
-    } catch (e) {}
-}
-requestWakeLock();
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') requestWakeLock();
-});
-
 const firebaseConfig = {
     apiKey: "AIzaSyB3DgeOTZMHClqzRsKuhnxBVDNaVUq9RHk",
     authDomain: "gold-clicker-bf955.firebaseapp.com",
@@ -50,13 +28,13 @@ const clickUpgrades = [
 ];
 
 const botUpgrades = [
-    { id: 'bu1', name: 'Bakır Madenci', icon: '👷', desc: '+1 altın/sn', baseCost: 300, costMult: 4.0, level: 0, maxLevel: 25, gps: 1 },
-    { id: 'bu2', name: 'Demir Madenci', icon: '⚙️', desc: '+3 altın/sn', baseCost: 900, costMult: 5.5, level: 0, maxLevel: 20, gps: 3 },
-    { id: 'bu3', name: 'Gümüş Madenci', icon: '🔧', desc: '+8 altın/sn', baseCost: 2700, costMult: 6.0, level: 0, maxLevel: 15, gps: 8 },
-    { id: 'bu4', name: 'Altın Madenci', icon: '🏗️', desc: '+25 altın/sn', baseCost: 8100, costMult: 6.5, level: 0, maxLevel: 12, gps: 25 },
-    { id: 'bu5', name: 'Elmas Madenci', icon: '💠', desc: '+80 altın/sn', baseCost: 24300, costMult: 7.0, level: 0, maxLevel: 10, gps: 80 },
-    { id: 'bu6', name: 'Efsanevi Robot', icon: '🤖', desc: '+300 altın/sn', baseCost: 72900, costMult: 8.0, level: 0, maxLevel: 8, gps: 300 },
-    { id: 'bu7', name: 'Uzay Madeni', icon: '🚀', desc: '+1000 altın/sn', baseCost: 218700, costMult: 9.0, level: 0, maxLevel: 5, gps: 1000 },
+    { id: 'bu1', name: 'Bakır Madenci', icon: '👷', desc: '+1 altın/sn', baseCost: 100, costMult: 3.0, level: 0, maxLevel: 25, gps: 1 },
+    { id: 'bu2', name: 'Demir Madenci', icon: '⚙️', desc: '+3 altın/sn', baseCost: 900, costMult: 4.5, level: 0, maxLevel: 20, gps: 3 },
+    { id: 'bu3', name: 'Gümüş Madenci', icon: '🔧', desc: '+8 altın/sn', baseCost: 3200, costMult: 6.0, level: 0, maxLevel: 15, gps: 8 },
+    { id: 'bu4', name: 'Altın Madenci', icon: '🏗️', desc: '+25 altın/sn', baseCost: 20000, costMult: 5.0, level: 0, maxLevel: 12, gps: 25 },
+    { id: 'bu5', name: 'Elmas Madenci', icon: '💠', desc: '+80 altın/sn', baseCost: 90000, costMult: 6.0, level: 0, maxLevel: 10, gps: 80 },
+    { id: 'bu6', name: 'Efsanevi Robot', icon: '🤖', desc: '+300 altın/sn', baseCost: 500000, costMult: 7.0, level: 0, maxLevel: 8, gps: 300 },
+    { id: 'bu7', name: 'Uzay Madeni', icon: '🚀', desc: '+1000 altın/sn', baseCost: 3000000, costMult: 8.0, level: 0, maxLevel: 5, gps: 1000 },
 ];
 
 function getCost(upgrade) {
@@ -225,43 +203,6 @@ setInterval(() => {
     }
 }, 1000);
 
-// REWARDED INTERSTITIAL - Her 3 dakikada bir
-setInterval(() => {
-    showRewardedInterstitial();
-}, 3 * 60 * 1000);
-
-function showRewardedInterstitial() {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.92); z-index: 9999;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        color: white;
-    `;
-    let sec = 15;
-    overlay.innerHTML = `
-        <div style="font-size:4rem">📺</div>
-        <div style="font-size:1.3rem;margin:15px 0">Reklam izleniyor...</div>
-        <div id="ri-countdown" style="font-size:3rem;color:#ffd700;font-weight:bold">${sec}</div>
-        <div style="font-size:0.85rem;color:#aaa;margin-top:15px">Otomatik kapanacak</div>
-        <div style="margin-top:10px;font-size:0.9rem;color:#2ecc71">🎁 +500 altın kazanıyorsun!</div>
-    `;
-    document.body.appendChild(overlay);
-
-    const interval = setInterval(() => {
-        sec--;
-        const cd = document.getElementById('ri-countdown');
-        if (cd) cd.textContent = sec;
-        if (sec <= 0) {
-            clearInterval(interval);
-            overlay.remove();
-            gold += 500;
-            renderAll();
-            saveGame();
-        }
-    }, 1000);
-}
-
 function loadLeaderboard() {
     db.ref('leaderboard').orderByValue().limitToLast(10).on('value', snap => {
         const data = snap.val();
@@ -316,7 +257,42 @@ function loadGame() {
         });
     }
 }
+// REWARDED INTERSTITIAL - Her 3 dakikada bir
+setInterval(() => {
+    showRewardedInterstitial();
+}, 3 * 60 * 1000);
 
+function showRewardedInterstitial() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.92); z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        color: white;
+    `;
+    let sec = 15;
+    overlay.innerHTML = `
+        <div style="font-size:4rem">📺</div>
+        <div style="font-size:1.3rem;margin:15px 0">Reklam izleniyor...</div>
+        <div id="ri-countdown" style="font-size:3rem;color:#ffd700;font-weight:bold">${sec}</div>
+        <div style="font-size:0.85rem;color:#aaa;margin-top:15px">Otomatik kapanacak</div>
+        <div style="margin-top:10px;font-size:0.9rem;color:#2ecc71">🎁 +500 altın kazanıyorsun!</div>
+    `;
+    document.body.appendChild(overlay);
+
+    const interval = setInterval(() => {
+        sec--;
+        const cd = document.getElementById('ri-countdown');
+        if (cd) cd.textContent = sec;
+        if (sec <= 0) {
+            clearInterval(interval);
+            overlay.remove();
+            gold += 500;
+            renderAll();
+            saveGame();
+        }
+    }, 1000);
+}
 loadGame();
 renderAll();
 loadLeaderboard();
